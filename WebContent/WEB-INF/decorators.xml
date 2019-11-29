@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+
+<decorators defaultdir="/decodeco">
+	<decorator name="main" page="deco_main.jsp">
+		<pattern>/member/*</pattern>
+		<pattern>/board/*</pattern>
+	</decorator>
+	
+	<!-- 제외되는 페이지 설정 -->
+	<excludes>
+		<pattern>/member/login*</pattern>
+		<pattern>/member/join*</pattern>
+		<pattern>/member/profile*</pattern>
+		<pattern>/board/picture*</pattern>
+		<pattern>/member/pw*</pattern>
+		<pattern>/ajax/*</pattern>
+	</excludes>
+</decorators>

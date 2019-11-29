@@ -1,0 +1,61 @@
+body {
+	background-color: #f7f7f7;
+}
+table {
+	width : 70%;
+	border-collapse : collapse;
+	margin : auto;
+}
+th {
+	background-color : #E0E3DA;
+	border: 5px solid #f7f7f7;
+	text-align : center;
+	padding : 10px;
+}
+td {
+	color : #566270;
+}
+caption {
+	
+}
+td > .datepicker {
+	width : 20%;
+}
+input[type=text],input[type=password],textarea {
+	width : 100%;
+	color : #566270;
+}
+.save .cancle .button {
+	text-align : center;
+	background-color:transparent;
+	border-radius:20px;
+	border:1px solid #566270;
+	display:inline-block;
+	cursor:pointer;
+	color:#566270;
+	font-family:Arial;
+	font-size:16px;
+	padding:15px 15px;
+	text-decoration:none;
+}
+.save:hover {
+	background-color: #E0E3DA;
+	color:#566270;
+}
+.cancle:hover {
+	background-color: #E0E3DA;
+	color:#566270;
+}
+.divcenter {
+	text-align : center;
+	margin : auto;
+}
+.mainTitle {
+	font-size:30px;
+	margin : auto;
+}
+.temp {
+	background-color: #E0E3DA;
+	color:#566270;
+	margin : auto;
+}
