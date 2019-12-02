@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -229,13 +230,13 @@ public class AllAction {
 	public ActionForward mainInfo(HttpServletRequest request, HttpServletResponse response) {
 		if(LogCheck(request, response) ==1) {
 			// 1번
-			int limit =10;
+			int limit =5;
 			int pageNum =1;
 			
 			try {
 				pageNum = Integer.parseInt(request.getParameter("pageNum"));
 			} catch(NumberFormatException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			
 			int boardcnt = tdao.boardCount();
@@ -247,7 +248,7 @@ public class AllAction {
 				endpage = maxpage;
 			}
 			int boardnum = boardcnt - (pageNum -1) *limit;
-			
+			System.out.println(list);
 			// 3번
 			request.setAttribute("boardcnt", boardcnt);
 			request.setAttribute("list", list);
@@ -256,7 +257,7 @@ public class AllAction {
 			request.setAttribute("endpage", endpage);
 			request.setAttribute("boardnum", boardnum);
 			request.setAttribute("pageNum", pageNum);
-			return new ActionForward();	
+			return new ActionForward();
 			} else {
 				request.setAttribute("msg", "로그인이 필요합니다");
 				request.setAttribute("url", "loginForm.pro");
@@ -269,5 +270,13 @@ public class AllAction {
 	 * 
 	 * 2. 화면에 필요한  정보를 속성으로 등록 => view로 전송
 	 */
-	
+	public ActionForward info(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		
+		int num = Integer.parseInt(request.getParameter("num"));
+		
+		Travel info = tdao.selectOne(num); // num에 해당하는 게시물 조회
+						
+		request.setAttribute("info", info);
+		return new ActionForward();
+	}
 }

@@ -4,8 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.ibatis.session.SqlSession;
 
+import action.ActionForward;
 import table.mapper.TravelMapper;
 
 public class TravelDao {
@@ -68,7 +73,19 @@ public class TravelDao {
 		return null;
 	}
 
+	public Travel selectOne(int num) {
+		SqlSession session = DBConnection.getConnection();		
+		
+		try {
+			map.clear();
+			map.put("num", num);
+			return session.getMapper(cls).select(map).get(0);
+		} catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			DBConnection.close(session);
+		}
+		return null;
+	}
 
-	
-	
 }

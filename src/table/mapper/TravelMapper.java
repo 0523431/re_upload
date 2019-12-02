@@ -25,7 +25,7 @@ public interface TravelMapper {
 			 	" <choose>",
 			 		" <when test='travelNum !=null'> where travelNum =#{travelNum} </when>",
 			 		" <otherwise>"
-			 + 			" order by limit #{start},#{limit}"
+			 + 			" limit #{start},#{limit}"
 			 + 		" </otherwise>",
 			 	"</choose>",
 			 "</script>"})

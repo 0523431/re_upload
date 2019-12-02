@@ -8,6 +8,13 @@
 <head>
 <meta charset="EUC-KR">
 <title>A new journey</title>
+<script>
+	// 검색 후, 그 결과를 페이지에 유지시켜주는 메서드함수
+	function listdo(page) { // listdo 메서드에 page값을 넣고
+		document.f.pageNum.value = page; // pageNum의 value값을 바꿔주는 거야
+		document.f.submit(); // form을 submit해주는 거야
+	}
+</script>
 <style type="text/css">
 	div {
 		border-bottom: 5px solid #f7f7f7;
@@ -16,7 +23,8 @@
 		width: 70%;
 	}
 	.test {
-		border: 5px solid #f7f7f7;
+		margin : auto;
+		border: 2px solid #E0E3DA;
 		padding: 20px;
 		width : 275px;
 		border-radius: 10px;
@@ -33,23 +41,25 @@
 </div>
 
 <hr>
-<form action="mainInfo.pro" method="post" name="mainInfo">
+
+<form action="mainInfo.pro" method="post" name="f">
 <co:set var="today" value="<%=new java.util.Date() %>" />
 <input type="hidden" name="today" value="${today}">
 
 <input type="hidden" name="pageNum" value="1">
 	<div>
-		<co:forEach var="info" items="${info}">
-		<div class="test">
-			<p><a href="subList.pro?travelnum=${info.travelnum}">${info.traveltitle}</a></p>
-			<p>${info.start}&nbsp;&nbsp;${info.end}</p>
-			<p>${info.budget}</p>
+		<co:forEach var="list" items="${list}">
+		<div class="test" style="background-image:url(${list.background})">
+			<p><a href="subList.pro?travelNum=${list.travelNum}">${list.traveltitle}</a></p>
+			<p>${list.start}&nbsp;-&nbsp;${list.end}</p>
+			<p>${list.budget}</p>
 		</div>
+		<br>
 		</co:forEach>	
 	</div>
 	
 	<%-- 어려운 부분 --%>
-		<tr><td colspan="5">
+	<div>
 		<co:if test="${pageNum <=1}">
 			[이전]
 		</co:if>
@@ -75,8 +85,7 @@
 			<%-- <a href="list.do?pageNum=${pageNum +1}">[다음]</a> --%>
 			<a href="javascript:listdo(${pageNum +1})">[다음]</a>
 		</co:if>
-		</td></tr>
-
+	</div>
 </form>
 </body>
 </html>

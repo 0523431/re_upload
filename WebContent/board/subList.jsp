@@ -19,13 +19,13 @@ td {
 <body>
 
 <div class="mainTitle">
-	${list.traveltitle}
+	${info.traveltitle}
 </div>
 
 <table>
 	<tr>
 		<td>ALL</td>
- 		<c:forEach var="date" begin="${fn:substring(list.start,3,4)}" end="${fn:substring(list.end,3,4)}" >
+ 		<c:forEach var="date" begin="${fn:substring(info.start,4,6)}" end="${fn:substring(info.end,4,6)}" >
  		<td>${date}</td>
 		</c:forEach>
 	</tr>
@@ -43,11 +43,11 @@ td {
 <table>
 	<tr>
 		<td>¾´µ·</td>
-		<td>³²Àºµ· ${list.budget}</td>
+		<td>³²Àºµ· ${info.budget}</td>
 	</tr>
 </table>
 <br>
-<co:if test=${!emtpy }>
+<%-- <co:if test=${!emtpy info.}> --%>
 <table>
 	<tr>
 		<td rowspan="2"></td>
@@ -60,7 +60,7 @@ td {
 		<td></td>
 	</tr>
 </table>
-</co:if>
+<%-- </co:if> --%>
 
 </body>
 </html>

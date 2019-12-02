@@ -77,7 +77,7 @@
 	A new journey
 </div>
 <div class="divcenter">
-	<img src="" height="150" width="200" id="picture">
+	<img src="" height="150" width="200" id="picture" name="background">
 	<br><br>
 	<button onclick="return win_upload()" class="save">
 		커버사진등록
