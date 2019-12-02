@@ -32,28 +32,17 @@ public class AllAction {
 		
 		if(login ==null || login.trim().equals("")) {
 			request.setAttribute("msg", "로그인이 필요합니다");
-			request.setAttribute("url", "loginForm.pro");
+			request.setAttribute("url", "./member/loginForm.pro");
 			return 0;
 		} else {
 			// (info, update에서 필요한 조건 id !=null)
 			if(!login.equals("adminkim") && email !=null && !login.equals(email)) {
 				request.setAttribute("msg", "본인만 접근 가능합니다");
-				request.setAttribute("url", "main.pro");
+				request.setAttribute("url", "./../board/mainInfo.pro");
 				return 0;
 			}
 		}
 		return 1;
-	}
-	
-	public ActionForward main(HttpServletRequest request, HttpServletResponse response) {
-		if(LogCheck(request, response) ==1) {
-
-			return new ActionForward();
-		} else {
-			request.setAttribute("msg", "로그인이 필요합니다");
-			request.setAttribute("url", "loginForm.pro");
-			return new ActionForward(false, "../alert.jsp");
-		}
 	}
 
 	// 로그인
@@ -79,7 +68,7 @@ public class AllAction {
 				request.getSession().setAttribute("profile", profile);
 				
 				msg = mdao.selectEmail(email).getNickname() + "님이 로그인하셨습니다";
-				url = "main.pro";
+				url = "./../board/mainInfo.pro";
 			} else {
 				msg = "비밀번호가 일치하지 않습니다";
 			}
@@ -194,8 +183,18 @@ public class AllAction {
 		return new ActionForward();
 	}
 	
+	/* <메인 여행지 등록하기>
+	 * 
+	 * 1. 파라미터값을 Travel 객체에 저장
+	 * 2. 게시물 번호 num은 현재 등록된 num의 최대값을 조회 후 +1
+	 *    => 등록된 게시물의 번호 : 최대값 +1
+	 *    => db에서 maxnum을 구해서 1을 더한 값이 num이 되는 거야
+	 *    
+	 * 3. 입력된 내용(1번에서 한 내용)을 db에 등록하기
+	 */
 	public ActionForward mainWrite(HttpServletRequest request, HttpServletResponse response) {
 		if(LogCheck(request, response) ==1) {
+			// 1번
 			tra.setTraveltitle(request.getParameter("traveltitle"));
 			tra.setCountry(request.getParameter("country"));
 			tra.setStart(request.getParameter("start"));
@@ -209,9 +208,14 @@ public class AllAction {
 			
 			System.out.println(tra);
 			
+			// 2번
+			int num = tdao.maxnum();
+			tra.setTravelNum(++num);
+			
+			// 3번
 			if(tdao.insertMain(tra) > 0) {
 				msg = "여행지"+ tra.getTraveltitle() +"가 등록되었습니다.";
-				url = "subList.pro?";
+				url = "mainInfo.pro";
 				System.out.println("확인 : " + tra);
 			}
 			request.setAttribute("msg", msg);
@@ -221,25 +225,49 @@ public class AllAction {
 		return new ActionForward();
 	}
 	
-	/* <할 일>
-	 * 1. 한 페이지에 보여지는 게시글은 지정된 날짜에 오늘이 포함되면 보여야해
+	// 조회한 num의 정보를 화면에 출력
+	public ActionForward mainInfo(HttpServletRequest request, HttpServletResponse response) {
+		if(LogCheck(request, response) ==1) {
+			// 1번
+			int limit =10;
+			int pageNum =1;
+			
+			try {
+				pageNum = Integer.parseInt(request.getParameter("pageNum"));
+			} catch(NumberFormatException e) {
+				e.printStackTrace();
+			}
+			
+			int boardcnt = tdao.boardCount();
+			List<Travel> list = tdao.list(pageNum, limit);
+			int maxpage = (int)((double)boardcnt/limit + 0.95);
+			int startpage = ((int)(pageNum/10.0 + 0.9) -1) *10 +1;
+			int endpage = startpage +9;
+			if(endpage > maxpage) {
+				endpage = maxpage;
+			}
+			int boardnum = boardcnt - (pageNum -1) *limit;
+			
+			// 3번
+			request.setAttribute("boardcnt", boardcnt);
+			request.setAttribute("list", list);
+			request.setAttribute("maxpage", maxpage);
+			request.setAttribute("startpage", startpage);
+			request.setAttribute("endpage", endpage);
+			request.setAttribute("boardnum", boardnum);
+			request.setAttribute("pageNum", pageNum);
+			return new ActionForward();	
+			} else {
+				request.setAttribute("msg", "로그인이 필요합니다");
+				request.setAttribute("url", "loginForm.pro");
+				return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	
+	/* <등록한 여행지가 보여지는 리스트>
+	 * 1. 한 페이지에 보여지는 게시글은 지정된 날짜에 오늘이 포함되면 보여야해 (일단 보류)
 	 * 
 	 * 2. 화면에 필요한  정보를 속성으로 등록 => view로 전송
 	 */
-	public ActionForward listMain(HttpServletRequest request, HttpServletResponse response) {
-		if(LogCheck(request, response) ==1) {
-			
-		}
-		return new ActionForward(false, "../alert.jsp");
-	}
 	
-	// 여행지를 등록하고 나면 보여지는 리스트
-	public ActionForward listSub(HttpServletRequest request, HttpServletResponse response) {
-		if(LogCheck(request, response) ==1) {
-			List<Travel> list = tdao.listSub();
-			request.setAttribute("list", list);
-			return new ActionForward();
-		}
-		return new ActionForward(false, "../alert.jsp");
-	}
 }

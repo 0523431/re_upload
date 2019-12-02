@@ -69,7 +69,7 @@
 	</c:if>
   </div>
   <div class="w3-bar-block">
-    <a href="${path}/board/mainList.pro" class="w3-bar-item w3-button w3-hover-theme-d5">쓰자쓰자</a> 
+    <a href="${path}/board/mainInfo.pro" class="w3-bar-item w3-button w3-hover-theme-d5">쓰자쓰자</a> 
     <a href="${path}/board/subList.pro" class="w3-bar-item w3-button w3-hover-theme-d5">같이보자</a> 
     <a href="${path}/board/currencyList.pro" class="w3-bar-item w3-button w3-hover-w3-theme-d5">환율</a> 
     <a href="${path}/board/bookList.pro" class="w3-bar-item w3-button w3-hover-w3-theme-d5">따로보자</a> 

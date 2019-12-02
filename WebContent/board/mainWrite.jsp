@@ -87,7 +87,7 @@
 <table>
 	<tr>
 		<th colspan="2">제목</th>
-		<td><input type="text" name="traveltitle"></td>
+		<td><input type="text" name="traveltitle" autocomplete="off"></td>
 	</tr>
 	<tr>
 		<th colspan="2">여행지</th>
@@ -107,22 +107,22 @@
 	<tr><th rowspan="2">기간</th>
 		<td>Start</td>
 		<td class="datepicker">
-			<input type="text" id="datepicker_start" name="start">
+			<input type="text" id="datepicker_start" name="start" autocomplete="off">
 		</td>
 	</tr>
 	<tr>
 		<td>End</td>
 		<td class="datepicker">
-			<input type="text" id="datepicker_end" name="end">
+			<input type="text" id="datepicker_end" name="end" autocomplete="off">
 		</td>
 	</tr>
 	<tr>
 		<th colspan="2">환율</th>
-		<td><input type="text" name="currency"></td>
+		<td><input type="text" name="currency" autocomplete="off"></td>
 	</tr>
 	<tr>
 		<th colspan="2">예산</th>
-		<td><input type="text" name="budget"></td>
+		<td><input type="text" name="budget" autocomplete="off"></td>
 	</tr>
 	<tr>
 		<td colspan="2" class=""></td>

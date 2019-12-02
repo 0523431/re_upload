@@ -25,7 +25,8 @@ td {
 <table>
 	<tr>
 		<td>ALL</td>
- 		<c:forEach var="date" begin="${fn:substring(list.start,3,4)}" end="${fn:substring(list.end,3,4)}" ><td>${date}</td>
+ 		<c:forEach var="date" begin="${fn:substring(list.start,3,4)}" end="${fn:substring(list.end,3,4)}" >
+ 		<td>${date}</td>
 		</c:forEach>
 	</tr>
 </table>
@@ -35,7 +36,7 @@ td {
 		<td onclick="">ALL</td>
 		<td onclick="">CASH</td>
 		<td onclick="">CARD</td>
-		<td onclick="location.href='subWrite.pro'">새 지출</td>
+		<td onclick="location.href='subWrite.pro?date='+">새 지출</td>
 	</tr>
 </table>
 <br>
