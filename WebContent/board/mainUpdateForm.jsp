@@ -7,8 +7,7 @@
 <html>
 <head>
 <meta charset="EUC-KR">
-<title>여행지를 등록해볼까요?</title>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<title>여행지를 수정해볼까요?</title>
 <!-- datepicker source -->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -45,8 +44,8 @@ $(document).ready(function () {
 		$.ajax({
 			url : "${path}/ajax/code.jsp",
 			success : function(data) {
-				conti = JSON.parse(data);
-				europe = conti.유럽;
+				conti = JSON.parse(data); // 객체
+				europe = conti.유럽; // 배열
 				$.each(europe, function(index, item) {
 					var country = item.country;
 					euhtml += "<option>"+country+"</option>";
@@ -54,7 +53,7 @@ $(document).ready(function () {
 				console.log(euhtml)
 				$("#country").html(euhtml);
 			},
-			eooro : function(e) {
+			error : function(e) {
 				alert("서버오류 : " + e.satus);
 			}
 		})
@@ -63,7 +62,7 @@ $(document).ready(function () {
 	function selectcon(op) { // op:선택한 대륙
 		console.log(op.value);
 		html ="";
-		var contis = conti[op.value];
+		var contis = conti[op.value]; // 배열
 		$.each(contis, function(index, item) {
 			var country = item.country;
 			html += "<option>"+country+"</option>";
@@ -71,31 +70,18 @@ $(document).ready(function () {
 		console.log(html)
 		$("#country").html(html);
 	}
-
+	
 	function checkToSave() {
 		f = document.f;
-		if(f.traveltitle.value =="") {
-			alert("여행 제목을 입력하세요");
-			f.traveltitle.focus();
-			return false;
-		}
-		if(f.start.value =="") {
-			alert("여행일정을 선택하세요");
-			f.traveltitle.focus();
-			return false;
-		}
-		if(f.end.value =="") {
-			alert("여행일정을 선택하세요");
-			f.traveltitle.focus();
-			return false;
-		}
-		if(f.currency.value =="") {
-			alert("환율을 입력하세요");
+		var checkcurrency = $('#currency').val();
+		if (isNaN(checkcurrency)) { // 숫자:false
+			alert("환율은 숫자만 입력해주세요");
 			f.currency.focus();
 			return false;
 		}
-		if(f.budget.value =="") {
-			alert("예산을 입력하세요");
+		var checkbudget = $('#budget').val();
+		if (isNaN(checkbudget)) { // 숫자:false
+			alert("예산 숫자만 입력해주세요");
 			f.budget.focus();
 			return false;
 		}
@@ -104,24 +90,27 @@ $(document).ready(function () {
 	function goback() {
 		history.back();  
 		return false;
-	}	
+	}
+	function gotodelete() {
+		location.href="mainDeleteForm.pro?travelNum=${param.travelNum}";
+		return false;
+	}
 </script>
-<style>
-
-</style>
 </head>
 <body>
-<form name="f" action="mainWrite.pro" method="post">
-<div class="mainTitle">
-	A new journey
-</div>
 
-<hr>
+<form name="f" action="mainUpdate.pro" method="post">
+	<input type="hidden" value="${param.travelNum}" name="travelNum">
 	<input type="hidden" value="${sessionScope.email}" name="email">
+
+	<div class="mainTitle">
+		등록한 여행지 수정
+	</div>
+<hr>
 <table>
 	<tr>
 		<th colspan="2">제목</th>
-		<td><input type="text" name="traveltitle" autocomplete="off"></td>
+		<td><input type="text" name="traveltitle" value="${info.traveltitle}" autocomplete="off"></td>
 	</tr>
 	<tr>
 		<th colspan="2">여행지</th>
@@ -139,44 +128,46 @@ $(document).ready(function () {
 		</td>
 	</tr>
 	<tr><th rowspan="2">기간</th>
-		<td style="text-align:right;">Start</td>
+		<td>Start</td>
 		<td class="datepicker">
 			<input type="text" id="startDate" name="start" autocomplete="off"
-					onfocus="if(this.value =='시작일을 선택해주세요') this.value='';"
-					onblur="if(this.value =='') this.value='시작일을 선택해주세요';"
-					value="시작일을 선택해주세요">
+					onfocus="if(this.value =='${info.start}') this.value='';"
+					onblur="if(this.value =='') this.value='${info.start}';"
+					value="${info.start}">
 		</td>
 	</tr>
 	<tr>
-		<td style="text-align:right;">End</td>
+		<td>End</td>
 		<td class="datepicker">
 			<input type="text" id="endDate" name="end" autocomplete="off"
-					onfocus="if(this.value =='마지막날을 선택해주세요') this.value='';"
-					onblur="if(this.value =='') this.value='마지막날을 선택해주세요';"
-					value="마지막날을 선택해주세요">
+					onfocus="if(this.value =='${info.end}') this.value='';"
+					onblur="if(this.value =='') this.value='${info.end}';"
+					value="${info.end}">
 		</td>
 	</tr>
 	<tr>
 		<th colspan="2">환율</th>
-		<td><input type="text" name="currency" autocomplete="off"
-			 onfocus="if(this.value =='환전 당일 환율 (숫자만입력하세요)') this.value='';"
-			 onblur="if(this.value =='') this.value='환전 당일 환율 (숫자만입력하세요)';"
-			 value="환전 당일 환율 (숫자만입력하세요)"
-			 ></td>
+		<td><input type="text" id="currency" name="currency" autocomplete="off"
+			 onfocus="if(this.value =='${info.currency}') this.value='';"
+			 onblur="if(this.value =='') this.value='${info.currency}';"
+			 value="${info.currency}"></td>
 	</tr>
 	<tr>
 		<th colspan="2">예산</th>
-		<td><input type="text" name="budget" autocomplete="off"
-			 onfocus="if(this.value =='여행 예산은 얼마입니까? (숫자만입력하세요)') this.value='';"
-			 onblur="if(this.value =='') this.value='여행 예산은 얼마입니까? (숫자만입력하세요)';"
-			 value="여행 예산은 얼마입니까? (숫자만입력하세요)"></td>
+		<td><input type="text" id="budget" name="budget" autocomplete="off"
+			 onfocus="if(this.value =='${info.budget}') this.value='';"
+			 onblur="if(this.value =='') this.value='${info.budget}';"
+			 value="${info.budget}"></td>
 	</tr>
 	<tr>
 		<td colspan="2" class="sub"></td>
 		<td>
-			<button onclick="return goback()" class="cancle">CANCLE</button>
+			<button onclick="return goback()" class="cancle">취소</button>
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			<button onclick="return checkToSave()" class="save">SAVE</button>
+			<button onclick="return checkToSave()" class="save">저장</button>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button onclick="return gotodelete()" class="save">삭제</button>
+			
 		</td>
 </table>
 </form>

@@ -3,8 +3,10 @@ package table.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import tables.Travel;
 
@@ -22,16 +24,24 @@ public interface TravelMapper {
 	// 게시글 목록(검색 목록까지)
 	@Select({"<script>",
 			 " select * from travel ",
-			 	" <choose>",
-			 		" <when test='travelNum !=null'> where travelNum =#{travelNum} </when>",
-			 		" <otherwise>"
-			 + 			" limit #{start},#{limit}"
-			 + 		" </otherwise>",
-			 	"</choose>",
+			 	" where 1+1 ",
+			 		" <if test='travelNum !=null'> and travelNum =#{travelNum} </if>",
+			 		" <if test='email !=null'> and email =#{email} </if>",
+			  	" order by travelNum desc ",
 			 "</script>"})
 	List<Travel> select(Map<String, Object> map);
 	
-	@Select("select count(*) from travel")
-	int boardCount();
+	@Select("select count(*) from travel where email=#{email}")
+	int boardCount(String email);
+	
+	@Update(" update travel set "
+			+ " traveltitle=#{traveltitle}, "
+			+ " start=#{start},end=#{end},country=#{country}, "
+			+ " currency=#{currency},budget=#{budget} "
+			+ " where travelNum=#{travelNum} ")
+	int mainUpdate(Travel tra);
+
+	@Delete("delete from travel where travelNum=#{travelNum}")
+	int mainDelete(Travel tra);
 
 }

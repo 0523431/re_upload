@@ -3,6 +3,7 @@ package action;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.oreilly.servlet.MultipartRequest;
 
+import tables.Bookmark;
+import tables.BookmarkDao;
+import tables.Expense;
+import tables.ExpenseDao;
 import tables.Member;
 import tables.MemberDao;
 import tables.Travel;
@@ -23,17 +28,20 @@ public class AllAction {
 	private TravelDao tdao = new TravelDao();
 	private Travel tra = new Travel();
 	
+	private ExpenseDao edao = new ExpenseDao();
+	private Expense exp = new Expense();
+	
 	private String msg = null;
 	private String url = null;
 	
-	// 로그인 확인용
+	// 로그인 확인
 	public int LogCheck(HttpServletRequest request, HttpServletResponse response) {
 		String login = (String)request.getSession().getAttribute("email");
 		String email = request.getParameter("email");
 		
 		if(login ==null || login.trim().equals("")) {
 			request.setAttribute("msg", "로그인이 필요합니다");
-			request.setAttribute("url", "./member/loginForm.pro");
+			request.setAttribute("url", "./member/loginForm.jsp");
 			return 0;
 		} else {
 			// (info, update에서 필요한 조건 id !=null)
@@ -47,15 +55,13 @@ public class AllAction {
 	}
 
 	// 로그인
-	// 1. id, pass 파라미터 저장
-	// 2. id정보 db에서 조회하고 비밀번호 검증
 	public ActionForward login(HttpServletRequest request, HttpServletResponse response) {
-				
 		String email = request.getParameter("email");
 		String pass = request.getParameter("password");
 		
 		msg = "해당 이메일이 존재하지 않습니다.";
 		url = "loginForm.pro";
+		
 		Member mem = mdao.selectEmail(email);
 		
 		// db에 정보가 있음
@@ -68,20 +74,18 @@ public class AllAction {
 				request.getSession().setAttribute("nickname", nickname);
 				request.getSession().setAttribute("profile", profile);
 				
-				msg = mdao.selectEmail(email).getNickname() + "님이 로그인하셨습니다";
-				url = "./../board/mainInfo.pro";
+				msg = mem.getNickname() + "님이 로그인하셨습니다";
+				url = "./../board/mainInfo.pro?email="+email;
 			} else {
 				msg = "비밀번호가 일치하지 않습니다";
 			}
 		}
-		
 		request.setAttribute("msg", msg);
 		request.setAttribute("url", url);
 		return new ActionForward(false, "../alert.jsp");
 	}
 	
 	// 비밀번호 찾기
-	// 1. 입력한 이메일, 닉네임 받아와서 db에서 조회하기
 	public ActionForward passFind(HttpServletRequest request, HttpServletResponse response) {
 		String email = request.getParameter("email");
 		String nickname = request.getParameter("nickname");
@@ -102,7 +106,7 @@ public class AllAction {
 	// 로그아웃
 	public ActionForward logout(HttpServletRequest request, HttpServletResponse response) {
 		if(LogCheck(request, response) ==1) {
-			msg = "로그아웃하셨습니다.";
+			msg = "로그아웃하셨습니다";
 			url = "loginForm.pro";
 			
 			request.getSession().invalidate();
@@ -110,7 +114,7 @@ public class AllAction {
 			request.setAttribute("url", url);
 			return new ActionForward(false, "../alert.jsp");
 		} else {
-			msg = "???????????";
+			msg = "로그인이 필요합니다";
 			url = "loginForm.pro";
 			request.setAttribute("msg", msg);
 			request.setAttribute("url", url);
@@ -119,8 +123,6 @@ public class AllAction {
 	}
 	
 	// 회원가입
-	// 1. parameter정보를 Member객체에 저장
-	// 2. Member 객체를 db에 추가
 	public ActionForward join(HttpServletRequest request, HttpServletResponse response) {
 				
 		mem.setNickname(request.getParameter("nickname"));
@@ -142,61 +144,38 @@ public class AllAction {
 		return new ActionForward(false, "../alert.jsp");
 	}
 	
-	// 회원가입 프로필사진 로드
-	// (opener 화면에 결과주고 현재화면 close()하는건 javaScript에서)
+	// 회원가입 프로필사진 로드 (opener 화면에 결과주고 현재화면 close()하는건 javaScript에서)
 	public ActionForward profile(HttpServletRequest request, HttpServletResponse response) {
 		String path = request.getServletContext().getRealPath("") + "member/profile";
-		System.out.println("path : "+path);
-		
 		String filename = null;
 		try {
 			File f = new File(path);
 			if(!f.exists()) {
 				f.mkdirs();
 			}
-			
 			MultipartRequest multi = new MultipartRequest(request, path, 10*1024*1024, "euc-kr");
 			filename = multi.getFilesystemName("profile");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		request.setAttribute("filename", filename); // 이 속성값이 profile.jsp와 연계
 		return new ActionForward();
 	}
 	
-	public ActionForward picture(HttpServletRequest request, HttpServletResponse response) {
-		String path = request.getServletContext().getRealPath("") + "board/picture";
-		System.out.println("path : "+path);
-		
-		String filename = null;
-		try {
-			File f = new File(path);
-			if(!f.exists()) {
-				f.mkdirs();
-			}
-			
-			MultipartRequest multi = new MultipartRequest(request, path, 10*1024*1024, "euc-kr");
-			filename = multi.getFilesystemName("picture");
-		} catch (IOException e) {
-			e.printStackTrace();
+	public ActionForward mainWriteForm(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			return new ActionForward(false, "mainWrite.jsp");
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
 		}
-		request.setAttribute("filename", filename); // 이 속성값이 profile.jsp와 연계
-		return new ActionForward();
 	}
-	
-	/* <메인 여행지 등록하기>
-	 * 
-	 * 1. 파라미터값을 Travel 객체에 저장
-	 * 2. 게시물 번호 num은 현재 등록된 num의 최대값을 조회 후 +1
-	 *    => 등록된 게시물의 번호 : 최대값 +1
-	 *    => db에서 maxnum을 구해서 1을 더한 값이 num이 되는 거야
-	 *    
-	 * 3. 입력된 내용(1번에서 한 내용)을 db에 등록하기
-	 */
+	// 여행지 등록
 	public ActionForward mainWrite(HttpServletRequest request, HttpServletResponse response) {
 		if(LogCheck(request, response) ==1) {
-			// 1번
 			tra.setTraveltitle(request.getParameter("traveltitle"));
+			tra.setEmail(request.getParameter("email"));
 			tra.setCountry(request.getParameter("country"));
 			tra.setStart(request.getParameter("start"));
 			tra.setEnd(request.getParameter("end"));
@@ -205,19 +184,15 @@ public class AllAction {
 			tra.setBackground(request.getParameter("background"));
 			
 			msg = "여행지 등록에 실패하셨습니다";
-			url = "mainWrite.pro";
+			url = "mainWrite.pro?email="+tra.getEmail();
 			
-			System.out.println(tra);
-			
-			// 2번
 			int num = tdao.maxnum();
 			tra.setTravelNum(++num);
 			
-			// 3번
 			if(tdao.insertMain(tra) > 0) {
-				msg = "여행지"+ tra.getTraveltitle() +"가 등록되었습니다.";
-				url = "mainInfo.pro";
-				System.out.println("확인 : " + tra);
+				msg = tra.getTraveltitle() +"가 등록되었습니다.";
+				url = "mainInfo.pro?email="+tra.getEmail();
+				System.out.println("여행지 등록확인 : " + tra);
 			}
 			request.setAttribute("msg", msg);
 			request.setAttribute("url", url);
@@ -226,21 +201,21 @@ public class AllAction {
 		return new ActionForward();
 	}
 	
-	// 조회한 num의 정보를 화면에 출력
+	// 여행지 리스트
 	public ActionForward mainInfo(HttpServletRequest request, HttpServletResponse response) {
 		if(LogCheck(request, response) ==1) {
-			// 1번
 			int limit =5;
 			int pageNum =1;
-			
 			try {
 				pageNum = Integer.parseInt(request.getParameter("pageNum"));
 			} catch(NumberFormatException e) {
 				//e.printStackTrace();
 			}
 			
-			int boardcnt = tdao.boardCount();
-			List<Travel> list = tdao.list(pageNum, limit);
+			String email = (String)request.getSession().getAttribute("email");
+			int boardcnt = tdao.boardCount(email);
+
+			List<Travel> list = tdao.list(pageNum, limit, email);
 			int maxpage = (int)((double)boardcnt/limit + 0.95);
 			int startpage = ((int)(pageNum/10.0 + 0.9) -1) *10 +1;
 			int endpage = startpage +9;
@@ -248,8 +223,6 @@ public class AllAction {
 				endpage = maxpage;
 			}
 			int boardnum = boardcnt - (pageNum -1) *limit;
-			System.out.println(list);
-			// 3번
 			request.setAttribute("boardcnt", boardcnt);
 			request.setAttribute("list", list);
 			request.setAttribute("maxpage", maxpage);
@@ -260,23 +233,404 @@ public class AllAction {
 			return new ActionForward();
 			} else {
 				request.setAttribute("msg", "로그인이 필요합니다");
-				request.setAttribute("url", "loginForm.pro");
+				request.setAttribute("url", "../member/loginForm.pro");
 				return new ActionForward(false, "../alert.jsp");
+			}
+	}
+	
+	// 여행지 정보 제공
+	public ActionForward mainUpdateForm(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			int travelNum = Integer.parseInt(request.getParameter("travelNum"));
+			Travel info = tdao.selectOne(travelNum);
+			request.setAttribute("info", info);
+			return new ActionForward();
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+
+	// 여행지 수정
+	public ActionForward mainUpdate(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			tra.setTravelNum(Integer.parseInt(request.getParameter("travelNum")));
+			tra.setTraveltitle(request.getParameter("traveltitle"));
+			tra.setCountry(request.getParameter("country"));
+			tra.setEmail(request.getParameter("email"));
+			tra.setCountry(request.getParameter("country"));
+			tra.setStart(request.getParameter("start"));
+			tra.setEnd(request.getParameter("end"));
+			tra.setCurrency(Integer.parseInt(request.getParameter("currency")));
+			tra.setBudget(Integer.parseInt(request.getParameter("budget")));
+			
+			msg = "여행지 수정에 실패했습니다";
+			url = "mainUpdateForm.pro?travelNum="+tra.getTravelNum();
+						
+			if(tdao.mainUpdate(tra) >0) {
+				msg = "여행지 수정을 완료했습니다";
+				url = "mainInfo.pro?email="+tra.getEmail();
+			}
+			request.setAttribute("msg", msg);
+			request.setAttribute("url", url);
+			return new ActionForward(false, "../alert.jsp");
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	// 여행지 삭제하기
+	public ActionForward mainDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			int travelNum = Integer.parseInt(request.getParameter("travelNum"));
+			String pass = request.getParameter("password");
+				
+			String email = (String)request.getSession().getAttribute("email");
+			Member mem = mdao.selectEmail(email);
+			
+			Travel tra = tdao.selectOne(travelNum);
+			if(tra ==null) {
+				msg = "이미 삭제해서 없는 지출내역입니다";
+				url = "mainInfo.pro?emailm="+tra.getEmail();
+				} else {
+					if(pass.equals(mem.getPassword()) && !pass.trim().equals("")) {
+						if(tdao.mainDelete(tra) >0) {
+							msg = "여행지 삭제에 성공했습니다";
+							url = "mainInfo.pro?emailm="+tra.getEmail();
+						} else {
+							msg = "여행지 삭제에 실패했습니다";
+							url = "mainUpdateForm.pro?travelNum="+travelNum;
+						}
+					} else {
+						msg = "비밀번호가 일치하지 않습니다. 확인해주세요";
+						url = "mainDeleteForm.pro?travelNum="+tra.getTravelNum();
+					}
+				}
+				request.setAttribute("msg", msg);
+				request.setAttribute("url", url);
+				return new ActionForward(false, "../alert.jsp");
+			} else {
+				request.setAttribute("msg", "로그인이 필요합니다");
+				request.setAttribute("url", "../member/loginForm.pro");
+				return new ActionForward(false, "../alert.jsp");
+			}
+		}
+		
+	// <여행지 등록 후 지출내역이 보여지는 페이지>
+	public ActionForward subList(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			int travelNum = Integer.parseInt(request.getParameter("travelNum"));
+			String mode = request.getParameter("mode"); // url에서 직접 받음
+			if(mode == null || mode.equals("all")) mode = "all";
+			
+			Travel info = tdao.selectOne(travelNum); // num에 해당하는 게시물 조회
+			request.setAttribute("info", info); //  이걸로 여행기간을 불러올 수 있음
+			System.out.println("num에 해당하는 정보"+info);
+			
+			String email = request.getParameter("email");
+			
+			// 속성값으로 내용을 보냄
+			request.setAttribute("info", info);
+			request.setAttribute("travelNum", info.getTravelNum());
+			
+			int expcnt = edao.excnt(email, travelNum);
+			request.setAttribute("expcnt", expcnt);
+			
+			// travelNum에 등록된 지출을 list로 불러옴
+			List<Expense> exlist = edao.exlist(travelNum, email, mode);
+			request.setAttribute("exlist", exlist);
+			System.out.println("exlist : " + exlist);
+			
+			return new ActionForward();
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}		
+	}
+	
+	// <지출 작성하기>
+	public ActionForward subWrite(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			String email = (String)request.getSession().getAttribute("email");
+			int travelNum = Integer.parseInt(request.getParameter("travelNum"));
+			
+			Travel info = tdao.selectOne(travelNum); // num에 해당하는 게시물 조회
+			request.setAttribute("info", info); //  이걸로 여행기간을 불러올 수 있음
+			
+			exp.setEmail(request.getParameter("email"));
+			exp.setTravelNum(Integer.parseInt(request.getParameter("travelNum")));
+			exp.setType1(Integer.parseInt(request.getParameter("type1")));
+			exp.setPrice(Integer.parseInt(request.getParameter("price")));
+			exp.setType2(Integer.parseInt(request.getParameter("type2")));
+			exp.setPeocnt(Integer.parseInt(request.getParameter("peocnt")));
+			exp.setTitle(request.getParameter("title"));
+			exp.setSeldate(Integer.parseInt(request.getParameter("seldate")));
+			exp.setSelhour(Integer.parseInt(request.getParameter("selhour")));
+			exp.setSelminute(Integer.parseInt(request.getParameter("selminute")));
+			exp.setContent(request.getParameter("content"));
+			
+			msg = "게시물 등록 실패";
+			url = "subWriteForm.pro?travelNum="+exp.getTravelNum();
+			
+			// 지출번호
+			int expnum = edao.maxnum();
+			exp.setExpenseNum(++expnum);
+			
+			// 지출 등록
+			if(edao.insertEx(exp) > 0) {
+				msg = "금액 "+exp.getPrice()+" 사용";
+				url = "subList.pro?travelNum="+exp.getTravelNum();
+				System.out.println("지출 등록 : "+edao);
+			}
+			request.setAttribute("msg", msg);
+			request.setAttribute("url", url);
+			return new ActionForward(false, "../alert.jsp");
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
 		}
 	}
 	
-	/* <등록한 여행지가 보여지는 리스트>
-	 * 1. 한 페이지에 보여지는 게시글은 지정된 날짜에 오늘이 포함되면 보여야해 (일단 보류)
-	 * 
-	 * 2. 화면에 필요한  정보를 속성으로 등록 => view로 전송
-	 */
-	public ActionForward info(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		
-		int num = Integer.parseInt(request.getParameter("num"));
-		
-		Travel info = tdao.selectOne(num); // num에 해당하는 게시물 조회
-						
-		request.setAttribute("info", info);
-		return new ActionForward();
+	public ActionForward subWriteForm(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			int travelNum = Integer.parseInt(request.getParameter("travelNum"));
+			Travel info = tdao.selectOne(travelNum); // num에 해당하는 게시물 조회
+			request.setAttribute("info", info); //  이걸로 여행기간을 불러올 수 있음
+
+			return new ActionForward(false, "subWrite.jsp");
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
 	}
+	
+	public ActionForward subDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			
+			int expenseNum = Integer.parseInt(request.getParameter("expenseNum"));
+			Expense info = edao.selectEx(expenseNum);
+			request.setAttribute("info", info);
+			
+			int travelNum = info.getTravelNum();
+			Travel tinfo = tdao.selectOne(travelNum); // num에 해당하는 게시물 조회
+			request.setAttribute("tinfo", tinfo); //  이걸로 여행기간을 불러올 수 있음
+			
+			Travel info_period = tdao.selectOne(travelNum); // num에 해당하는 게시물 조회
+			request.setAttribute("info_period", info_period); //  이걸로 여행기간을 불러올 수 있음
+			return new ActionForward();
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	
+	// 지출 수정하기
+	public ActionForward subUpdate(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			int expenseNum = Integer.parseInt(request.getParameter("expenseNum"));
+			Expense info = edao.selectEx(expenseNum);
+			request.setAttribute("info", info);
+			
+			exp.setEmail(request.getParameter("email"));
+			exp.setTravelNum(Integer.parseInt(request.getParameter("travelNum")));
+			exp.setExpenseNum(Integer.parseInt(request.getParameter("expenseNum")));
+			exp.setType1(Integer.parseInt(request.getParameter("type1")));
+			exp.setPrice(Integer.parseInt(request.getParameter("price")));
+			exp.setType2(Integer.parseInt(request.getParameter("type2")));
+			exp.setPeocnt(Integer.parseInt(request.getParameter("peocnt")));
+			exp.setTitle(request.getParameter("title"));
+			exp.setSeldate(Integer.parseInt(request.getParameter("seldate")));
+			exp.setSelhour(Integer.parseInt(request.getParameter("selhour")));
+			exp.setSelminute(Integer.parseInt(request.getParameter("selminute")));
+			exp.setContent(request.getParameter("content"));
+			
+			msg = "지출내역을 수정하지 못했습니다 ㅠㅠ";
+			url = "subUpdateForm.pro?expenseNum="+exp.getExpenseNum();
+						
+			if(edao.subUpdate(exp) >0) {
+				msg = "지출내역 수정을 완료했습니다";
+				url = "subDetailForm.pro?expenseNum="+expenseNum;
+			}
+			
+			request.setAttribute("msg", msg);
+			request.setAttribute("url", url);
+			return new ActionForward(false, "../alert.jsp");
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	
+	// 지출 삭제하기
+	public ActionForward subDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			int expenseNum = Integer.parseInt(request.getParameter("expenseNum"));
+			String pass = request.getParameter("password");
+			
+			String email = (String)request.getSession().getAttribute("email");
+			Member mem = mdao.selectEmail(email);
+			
+			Expense exp = edao.selectEx(expenseNum);
+			if(exp ==null) {
+				msg = "이미 삭제해서 없는 지출내역입니다";
+				url = "subList.pro?travelNum="+exp.getTravelNum();
+			} else {
+				if(pass.equals(mem.getPassword()) && !pass.trim().equals("")) {
+					if(edao.subDelete(exp) >0) {
+						msg = "지출내역 삭제에 성공했습니다";
+						url = "subList.pro?travelNum="+exp.getTravelNum();
+					} else {
+						msg = "게시글 삭제에 실패했습니다";
+						url = "subDetailForm.pro?expenseNum="+exp.getExpenseNum();
+					}
+				} else {
+					msg = "비밀번호가 일치하지 않습니다. 확인해주세요";
+					url = "subDeleteForm.pro?expenseNum="+exp.getExpenseNum();
+				}
+			}
+			request.setAttribute("msg", msg);
+			request.setAttribute("url", url);
+			return new ActionForward(false, "../alert.jsp");
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	
+	public ActionForward graph(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			String email = (String)request.getSession().getAttribute("email");
+			Expense exp = edao.selectExp(email);
+			int travelNum = exp.getTravelNum();
+			
+			List<Map<Integer,Integer>> list = edao.graph(email, travelNum);
+			request.setAttribute("list", list);
+			return new ActionForward();
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}	
+	
+	// 모두보기(지출 리스트)
+	public ActionForward otherList(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			int limit = 10;
+			int pageNum = 1;
+			try {
+				pageNum = Integer.parseInt(request.getParameter("pageNum"));
+			} catch(NumberFormatException e) {
+				//e.printStackTrace();
+			}
+			
+			// 게시물 검색 조건
+			String column = request.getParameter("column");
+			String find = request.getParameter("find");
+			if(column !=null && column.trim().equals("")) {
+				column = null;
+			}
+			if(find != null && find.trim().equals("")) { // find를 선택하지않아도 검색 가능
+				find = null;
+			}
+			if(column == null || find == null) {
+				column =null;
+				find = null;
+			}
+
+			int expcnt = edao.expcnt(column, find); // 전체 지출 내역
+			List<Expense> list = edao.otherlist(limit, pageNum, column, find);
+			int maxpage = (int)((double)expcnt/limit + 0.95);
+			int startpage = ((int)(pageNum/10.0 + 0.9) -1) *10 +1;
+			int endpage = startpage +9;
+			if(endpage > maxpage) {
+				endpage = maxpage;
+			}
+			int expnum = expcnt - (pageNum-1) *limit;
+	
+			request.setAttribute("list", list);
+			request.setAttribute("expcnt", expcnt);
+			request.setAttribute("maxpage", maxpage);
+			request.setAttribute("startpage", startpage);
+			request.setAttribute("endpage", endpage);
+			request.setAttribute("expnum", expnum);
+			request.setAttribute("pageNum", pageNum);
+			return new ActionForward();
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	
+	public ActionForward myList(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			String email = (String)request.getSession().getAttribute("email");
+			
+			String pass = request.getParameter("password");
+			Member mem = mdao.selectEmail(email);
+
+			if(pass.equals(mem.getPassword())) {
+				msg = mem.getNickname() + "님의 정보수정이 가능합니다";
+				url = "myList.pro?email="+email;
+				request.setAttribute("msg", msg);
+				request.setAttribute("url", url);
+				return new ActionForward(false, "../alert.jsp");
+			} else {
+				msg = "비밀번호가 일치하지 않습니다";
+				url = "myListCheck.pro?email="+email;
+				request.setAttribute("msg", msg);
+				request.setAttribute("url", url);
+				return new ActionForward(false, "../alert.jsp");
+			}
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	
+	public ActionForward bookmarkform(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			
+			String email = request.getParameter("email");
+			int expenseNum = Integer.parseInt(request.getParameter("expenseNum"));
+			System.out.println("book확인 : "+ email + expenseNum);
+			
+			BookmarkDao bdao = new BookmarkDao();
+			Bookmark book = bdao.insert(email, expenseNum);
+			
+			return new ActionForward(false, "../board/otherList.pro");
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+
+	public ActionForward bookmark(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		if(LogCheck(request, response) ==1) {
+			String email = (String)request.getSession().getAttribute("email");
+			BookmarkDao bdao = new BookmarkDao();
+
+			List<Expense> list = bdao.select(email);
+			System.out.println("list 값 : "+list.toString());
+			request.setAttribute("list", list);
+			return new ActionForward();
+			
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+
 }

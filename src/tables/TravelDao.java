@@ -47,23 +47,25 @@ public class TravelDao {
 		return 0;
 	}
 
-	public int boardCount() {
+	public int boardCount(String email) {
 		SqlSession session = DBConnection.getConnection();
 		try {
-			return session.getMapper(cls).boardCount();
+			return session.getMapper(cls).boardCount(email);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		return 0;
 	}
 
-	public List<Travel> list(int pageNum, int limit) {
+	public List<Travel> list(int pageNum, int limit, String email) {
 		SqlSession session = DBConnection.getConnection();
 		
 		try {
 			map.clear();
 			map.put("start", (pageNum-1)*limit); // 0이면 첫번째 레코드
 			map.put("limit", limit);
+			map.put("email", email);
+
 			return session.getMapper(cls).select(map);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -73,12 +75,13 @@ public class TravelDao {
 		return null;
 	}
 
-	public Travel selectOne(int num) {
+	public Travel selectOne(int travelNum) {
 		SqlSession session = DBConnection.getConnection();		
 		
 		try {
 			map.clear();
-			map.put("num", num);
+			map.put("travelNum", travelNum);
+			System.out.println(travelNum);
 			return session.getMapper(cls).select(map).get(0);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -86,6 +89,36 @@ public class TravelDao {
 			DBConnection.close(session);
 		}
 		return null;
+	}
+	
+	public int mainUpdate(Travel tra) {
+		SqlSession session = DBConnection.getConnection();
+		try {
+			int cnt = session.getMapper(cls).mainUpdate(tra);
+			if(cnt >0) {
+				return 1;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			DBConnection.close(session);
+		}
+		return 0;
+	}
+
+	public int mainDelete(Travel tra) {
+		SqlSession session = DBConnection.getConnection();
+		try {
+			int cnt = session.getMapper(cls).mainDelete(tra);
+			if(cnt >0) {
+				return 1;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			DBConnection.close(session);
+		}
+		return 0;
 	}
 
 }

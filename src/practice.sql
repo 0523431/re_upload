@@ -38,7 +38,7 @@ CREATE TABLE Expense
 (
 	expenseNum  NOT NULL,
 	email varchar(20) NOT NULL,
-	travelNum int NOT NULL,
+	travelNum int,
 	type1 int NOT NULL,
 	price int NOT NULL,
 	type2 int NOT NULL,

@@ -38,6 +38,11 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <script type="text/javascript">
+	function goback() {
+		history.back();  
+		return false;
+	}
+	
 	function win_upload() {
 		var op = "width=400, height=150, munubar=no, top=200, left=500";
 		open("profileForm.pro","window`s name",op);
@@ -88,6 +93,33 @@
 			return false;
 		}
 		f.submit();
+		
+		function checkemail() {
+			var op = "width=400, height=150, munubar=no, top=200, left=500";
+			open("check.pro","window`s name",op);
+		}
+		
+		$("#confirm_name").click(function() {
+			var data = {nickname:$("#name").val()};
+			console.log(data)
+			$.ajax({
+					url : "ajax_name.jsp", // 요청페이지 설정
+					type : "POST", // method 방식 설정
+					data : data,
+					success : function(data) { // 콜백함수
+						console.log(data)
+						$("#message").html(data);
+						if($("h1").is(".find")) { // class값이 find이 h1태그가 존재해?
+							$("#nickname").val("");
+						}
+					},
+					error : function(e) {
+						// 시스템적인 오류 (500 : 쿼리문을 잘못 작성)
+						alert("서버오류 : " + e.status);
+					}
+			})
+			return false; //없어도 됨 의미 없음
+		})
 	}
 </script>
 
@@ -102,13 +134,15 @@
 					<!-- 회원정보 입력시작 -->
 					<input type="hidden" name="profile" value="">
 					<div class="wrap-input100 validate-input" data-validate="닉네임을 입력하세요">
-						<input class="input100" type="text" name="nickname">
+						<input class="input100" type="text" name="nickname" id="name" required>
 						<span class="focus-input100"></span>
 						<span class="label-input100">닉네임을 입력하세요</span>
 					</div>
 					<div style="float : right;">
-						<button class="w3-button w3-border w3-border-gray w3-round-large">중복확인</button>
+						<button class="w3-button w3-border w3-border-gray w3-round-large"
+								id="confirm_name">중복확인</button>
 					</div>
+					<div id="message"><!-- 내용출력 위치 --></div>
 					<br><br>
 					<div class="wrap-input100 validate-input" data-validate="이메일을 입력하세요">
 						<input class="input100" type="text" name="email">
@@ -116,7 +150,7 @@
 						<span class="label-input100">이메일을 입력하세요 : abcd@efg.com</span>
 					</div>
 					<div style="float : right;">
-						<button class="w3-button w3-border w3-border-gray w3-round-large">중복확인</button>
+						<button class="w3-button w3-border w3-border-gray w3-round-large" onclick="return checkemail()">중복확인</button>
 					</div>
 					<br><br>
 					<div class="wrap-input100 validate-input" data-validate="비밀번호를 입력하세요">
@@ -142,6 +176,12 @@
 					<div class="container-login100-form-btn">
 						<button class="login100-form-btn"  onclick="return inputcheck()">
 							Sign up
+						</button>
+					</div>
+					<br>
+					<div class="container-login100-form-btn">
+						<button class="login100-form-btn"  onclick="return goback()">
+							Cancle
 						</button>
 					</div>
 				</form>

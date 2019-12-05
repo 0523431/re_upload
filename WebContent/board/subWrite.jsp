@@ -1,47 +1,110 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="EUC-KR">
 <title>쓰자쓰자</title>
 <style>
-.sub {
+.tit {
 	color : #566270;
 	border: 3px solid #E0E3DA;
 	padding : 10px;
+	text-align : center;
 }
+.sub {
+	color : #566270;
+	border: 0px solid #E0E3DA;
+	padding : 10px;
+}
+
 </style>
+<script>
+
+	function checkToSave() {
+	 	if(f.type1.value =="") {
+			alert("현금? 카드? 무료? 선택해주세요");
+			//f.type1.focus();
+			return false;
+		}
+	 	var checkprice = $('#price').val();
+	 	if(isNaN(checkprice)) { // 숫자:false
+			alert("지출 금액은 숫자만 입력해주세요");
+			f.price.focus();
+			return false;
+		}
+	 	if(f.type2.value =="") {
+			alert("어떤 유형에 지출했는지 선택해주세요");
+			f.type1.focus();
+			return false;
+		}
+	 	if(f.type1.value =="") {
+			alert("현금? 카드? 무료? 선택해주세요");
+			f.type2.focus();
+			return false;
+		}
+	 	if(f.peocnt.value =="") {
+			alert("함께 동행한 인원을 선택해주세요");
+			f.peocnt.focus();
+			return false;
+		}
+	 	if(f.type1.value =="") {
+			alert("현금? 카드? 무료? 선택해주세요");
+			f.type1.focus();
+			return false;
+		}
+		f.submit();
+	}
+	function goback() {
+		history.back();  
+		return false;
+	}	
+</script>
 </head>
 <body>
 
+<form name="f" method="post" action="subWrite.pro">
+<input type="hidden" value="${sessionScope.email}" name="email">
+<input type="hidden" value="${param.travelNum}" name="travelNum">
+
 <table>
 	<tr>
-		<td class="sub">
-			<input type="radio" name="type1" value="1">현금
-			<input type="radio" name="type1" value="1">카드
-			<input type="radio" name="type1" value="1">무료
+		<td class="tit" width="20%">소비수단</td>
+		<td class="sub" width="30%">
+			<input type="radio" name="type1" value="1">현금&nbsp;&nbsp;
+			<input type="radio" name="type1" value="2">카드&nbsp;&nbsp;
+			<input type="radio" name="type1" value="3">무료&nbsp;&nbsp;
 		</td>
-		<td class="sub">
-			환율코드
+		<td class="tit" width="20%">
+			사용금액
 		</td>
-		<td class="sub" width="70%">
-			<input type="text" name="expense">
+		<td class="sub" width="30%">
+			<input type="text" name="price" id="price" autocomplete="off"
+					onfocus="if(this.value =='숫자만 입력하세요') this.value='';"
+					onblur="if(this.value =='') this.value='숫자만 입력하세요';"
+					value="숫자만 입력하세요">
 		</td>
 	</tr>
+</table>
+<br>
+<table>
 	<tr>
-		<td colspan="2" class="sub" width="80%">
-			<input type="radio" name="type2" value="1">식비
-			<input type="radio" name="type2" value="2">쇼핑
-			<input type="radio" name="type2" value="3">관광
-			<input type="radio" name="type2" value="4">교통
-			<input type="radio" name="type2" value="5">숙박
-			<input type="radio" name="type2" value="6">기념품
+		<td class="tit" width="15%">소비유형</td>
+		<td colspan="2" class="sub" width="60%">
+			<input type="radio" name="type2" value="1">식비&nbsp;&nbsp;
+			<input type="radio" name="type2" value="2">쇼핑&nbsp;&nbsp;
+			<input type="radio" name="type2" value="3">관광&nbsp;&nbsp;
+			<input type="radio" name="type2" value="4">교통&nbsp;&nbsp;
+			<input type="radio" name="type2" value="5">숙박&nbsp;&nbsp;
+			<input type="radio" name="type2" value="6">기념품&nbsp;&nbsp;
 			<input type="radio" name="type2" value="7">기타
 		</td>
+		<td class="tit" width="15%">동행자 수</td>
 		<td class="sub">
-			<select>
+			<select name="peocnt" onchange="selectpeo(this)">
 				<option value="1">1</option>
 				<option value="2">2</option>
 				<option value="3">3</option>
@@ -50,35 +113,60 @@
 			</select>
 		</td>
 	</tr>
+</table>
+<br>
+<table>
 	<tr>
-		<td class="sub">앞에서 선택한 날짜....</td>
+		<td class="tit">&nbsp;&nbsp;날짜&nbsp;&nbsp;</td>
+		<td class="sub">
+			<select name="seldate" id="seldate" onchange="selectdate(this)">
+				<c:forEach var="date" begin="${fn:substring(info.start,3,5)}" end="${fn:substring(info.end,3,5)}" >
+ 					<option value="${date}" id="seldate">&nbsp;&nbsp;&nbsp;&nbsp;${date}&nbsp;&nbsp;&nbsp;&nbsp;</option>
+				</c:forEach>
+			</select>
+			<input type="hidden" id="seldate3" value="">
+		</td>
 		<td rowspan="2" colspan="2" class="sub">
-			<input type="text" name="title">
+			<input type="text" name="title" autocomplete="off"
+					onfocus="if(this.value =='제목을 입력해주세요') this.value='';"
+					onblur="if(this.value =='') this.value='제목을 입력해주세요';"
+					value="제목을 입력해주세요">
 		</td>
 	</tr>
 	<tr>
+		<td class="tit">시간</td>
 		<td class="sub">
-			<select>
+			<select name="selhour" id="selhour" onchange="selecthour(this)">
 			<c:forEach var="i" begin="0" end="23">
 				<option value="${i}">&nbsp;${i}&nbsp;</option>
 			</c:forEach>
 			</select>
 			&nbsp;:&nbsp;
-			<select>
+			<select name="selminute" id="selminute" onchange="selectminute(this)">
 			<c:forEach var="i" begin="0" end="59">
 				<option value="${i}">&nbsp;&nbsp;${i}&nbsp;&nbsp;</option>
 			</c:forEach>
 			</select>
+			<input type="hidden" name="realtime" value="new Date()">
 		</td>
 	</tr>
 	<tr><td colspan="3" class="sub">
-			<textarea rows="15" name="content"></textarea>
+			<textarea rows="8" name="content" autocomplete="off"></textarea>
 		</td>
 	</tr>
-	<tr><td colspan="3" class="sub">
+	<!-- <tr><td colspan="3" class="sub">
 			<input type="text" name="map">
 		</td>
-	</tr>	
+	</tr> -->
 </table>
+<br>
+<div class="divcenter">
+	<button onclick="return goback()" class="cancle">CANCLE</button>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<button onclick="return checkToSave()" class="save">SAVE</button>
+
+</div>
+</form>
+
 </body>
 </html>

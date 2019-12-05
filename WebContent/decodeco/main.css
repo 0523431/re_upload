@@ -39,7 +39,7 @@ input[type=text],input[type=password],textarea {
 	text-decoration:none;
 }
 .save:hover {
-	background-color: #E0E3DA;
+	background-color:transparent;
 	color:#566270;
 }
 .cancle:hover {
@@ -59,3 +59,19 @@ input[type=text],input[type=password],textarea {
 	color:#566270;
 	margin : auto;
 }
+.circle-img {
+		object-fit: cover;
+		object-position: top;
+		border-radius: 50%;
+		height: 100px;
+		width: 100px;
+		margin : auto;
+	}
+.circle-other {
+		object-fit: cover;
+		object-position: top;
+		border-radius: 50%;
+		height: 70px;
+		width: 70px;
+		margin : auto;
+	}

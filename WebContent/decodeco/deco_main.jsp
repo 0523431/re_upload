@@ -37,15 +37,7 @@
 	.w3-half img:hover {
 		opacity:1
 	}
-	.circle-img {
-		object-fit: cover;
-		object-position: top;
-		border-radius: 50%;
-		height: 100px;
-		width: 100px;
-		margin : auto;
-	}
-
+	
 </style>
 <decorator:head />
 
@@ -70,11 +62,11 @@
 	</c:if>
   </div>
   <div class="w3-bar-block">
-    <a href="${path}/board/mainInfo.pro" class="w3-bar-item w3-button w3-hover-theme-d5">쓰자쓰자</a> 
-    <a href="${path}/board/subList.pro" class="w3-bar-item w3-button w3-hover-theme-d5">같이보자</a> 
+    <a href="${path}/board/mainInfo.pro?email=${sessionScope.email}" class="w3-bar-item w3-button w3-hover-theme-d5">쓰자쓰자</a> 
+    <a href="${path}/board/otherList.pro" class="w3-bar-item w3-button w3-hover-theme-d5">같이보자</a> 
     <a href="${path}/board/currencyList.pro" class="w3-bar-item w3-button w3-hover-w3-theme-d5">환율</a> 
-    <a href="${path}/board/bookList.pro" class="w3-bar-item w3-button w3-hover-w3-theme-d5">따로보자</a> 
-    <a href="${path}/board/myList.pro" class="w3-bar-item w3-button w3-hover-w3-theme-d5">나를보자</a> 
+    <a href="${path}/board/bookmark.pro?email=${sessionScope.email}" class="w3-bar-item w3-button w3-hover-w3-theme-d5">따로보자</a> 
+    <a href="${path}/board/myList.pro?email=${sessionScope.email}" class="w3-bar-item w3-button w3-hover-w3-theme-d5">나를보자</a> 
     <a href="#" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-w3-theme-d5">임보임보</a>
   </div>
 </nav>
