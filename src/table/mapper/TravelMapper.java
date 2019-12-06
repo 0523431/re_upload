@@ -25,9 +25,9 @@ public interface TravelMapper {
 	@Select({"<script>",
 			 " select * from travel ",
 			 	" where 1+1 ",
-			 		" <if test='travelNum !=null'> and travelNum =#{travelNum} </if>",
+		 			" <if test='travelNum !=null'> and travelNum =#{travelNum} </if>",
 			 		" <if test='email !=null'> and email =#{email} </if>",
-			  	" order by travelNum desc ",
+			  	" order by travelNum desc limit #{start}, #{limit}",
 			 "</script>"})
 	List<Travel> select(Map<String, Object> map);
 	

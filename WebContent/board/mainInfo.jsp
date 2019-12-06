@@ -9,9 +9,6 @@
 <head>
 <meta charset="EUC-KR">
 <title>A new journey</title>
-<%-- charjs를 쓰기 위해서 --%>
-<script type="text/javascript" src="http://www.chartjs.org/dist/2.9.3/Chart.min.js">
-</script>
 <%-- ajax을 이용해서 사용할 예정이라서 jquery를 연결 --%>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
@@ -19,59 +16,6 @@
 	function listdo(page) { // listdo 메서드에 page값을 넣고
 		document.f.pageNum.value = page; // pageNum의 value값을 바꿔주는 거야
 		document.f.submit(); // form을 submit해주는 거야
-	}
-	
-	// graph > json형태를 view단에서 만들어줌
-	function graphs() {
-		$.ajax("${path}/ajax/graph.pro", {
-			success : function(data) {
-				console.log(data);
-				barGraphprint(data);
-			},
-			error : function(e) {
-				alert("서버오류" + e.satus);
-			}
-		})
-	}
-
-	function barGraphprint(data) {
-		// data : 서버에서 전달한 JSON형태의 데이터
-		var rows = JSON.parse(data);
-		
-		// 배열 데이터로 만들어줌
-		var type2s = []; // 라벨 데이터
-		var datas = []; // 건수 데이터
-		var colors = []; // 색상
-		
-		// json파일을 분석하여 필요한 데이터로 저장해주는 과정
-		$.each(rows, function(index, item) {
-			type2s[index] = item.type2; // 소비유형 | type2 : boardAllAction에서 정한 변수명
-			datas[index] = item.cnt; // 글의 개수 저장 | cnt : boardAllAction에서 정한 변수명
-			colors[index] = [red, green, blue, purple, gray, yellow, orange];
-		})
-		
-		var config = {
-			type : "pie",
-			data : {
-				datasets :[{
-					data : datas,
-					backgroundColor : colors,
-				}],
-				labels : names
-			},
-			options : {
-				responsive : true,
-				legend : {
-					position : "top"
-				},
-				title : {
-					display : true,
-					text : "글쓴이 별 게시판 등록 건수"
-				}
-			}
-		};
-		var ctx = document.getElementById("canvas").getContext("2d");
-		new Chart(ctx, config);
 	}
 </script>
 <style type="text/css">
@@ -135,10 +79,10 @@
 			<p>${list.start}&nbsp;-&nbsp;${list.end}</p>
 			<p>예산 : ${list.budget}&nbsp;&nbsp;&nbsp; <p>여행지 : ${list.country}</p>
 		</div>
-		<div>
+		<!-- <div class="test">
 			<canvas id="canvas">
 			</canvas>
-		</div>
+		</div> -->
 		</co:forEach>
 	</div>
 	

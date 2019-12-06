@@ -25,9 +25,8 @@
 <script>
 	function checkToSave() {
 		var checkprice = $('#price').val();
-		if (isNaN(checkprice)) { // 숫자:false
+		if (isNaN(checkprice) || checkprice =='') { // 숫자:false
 			alert("지출 금액은 숫자만 입력해주세요");
-		console.log(checkprice)
 			f.price.focus();
 			return false;
 		}
@@ -59,9 +58,7 @@
 		</td>
 		<td class="sub" width="30%">
 			<input type="text" name="price" id="price" autocomplete="off"
-					onfocus="if(this.value =='${info.price} \(숫자만 입력하세요\)') this.value='';"
-					onblur="if(this.value =='') this.value='${info.price} (숫자만 입력하세요)';"
-					value="${info.price} (숫자만 입력하세요)">
+					placeholder="숫자만 입력하세요" value="${info.price}">
 		</td>
 	</tr>
 </table>
@@ -122,7 +119,10 @@
 		</td>
 	</tr>
 	<tr><td colspan="3" class="sub">
-			<textarea rows="8" name="content" autocomplete="off">${info.content}</textarea>
+			<textarea rows="8" name="content" id="content1" autocomplete="off">${info.content}</textarea>
+			<script>
+				CKEDITOR.replace("content1", {filebrowserImageUploadUrl : "imgupload.pro"});
+			</script>
 		</td>
 	</tr>
 </table>

@@ -80,7 +80,9 @@ public class TravelDao {
 		
 		try {
 			map.clear();
-			map.put("travelNum", travelNum);
+			map.put("travelNum",travelNum);
+			map.put("start", 0);
+			map.put("limit", 1);
 			System.out.println(travelNum);
 			return session.getMapper(cls).select(map).get(0);
 		} catch(Exception e) {

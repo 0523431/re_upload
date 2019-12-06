@@ -60,15 +60,15 @@ public class ExpenseDao {
 		return 0;
 	}
 
-	public List<Expense> exlist(int travelNum, String email, String mode) {
+	public List<Expense> exlist(int travelNum, String email, String type1) {
 		SqlSession session = DBConnection.getConnection();
 		
 		try {
 			map.clear();
 			map.put("travelNum", travelNum);
 			map.put("email", email);
-			if(!mode.equals("all")) {
-				map.put("mode", Integer.parseInt(mode));
+			if(!type1.equals("all")) {
+				map.put("type1", Integer.parseInt(type1));
 			}
 			return session.getMapper(cls).exlist(map);
 		} catch(Exception e) {
@@ -113,22 +113,20 @@ public class ExpenseDao {
 		}
 		return null;
 	}
-
-	public List<Map<Integer, Integer>> graph(String email, int travelNum) {
+	
+	// 그래프
+	public List<Map<String, Integer>> graph(String email, int travelNum) {
 		SqlSession session = DBConnection.getConnection();
-		
-		// key : 컬럼명=type2, count || value= 그 값
+		// <key,value> => key : 컬럼명=type2 || value= 그 값
+		List<Map<String, Integer>> map = null;
 		try {
-			map.clear();
-			map.put("email", email);
-			map.put("travelNum", travelNum);
-			return session.getMapper(cls).graph(map);
+			map = session.getMapper(cls).graph(email, travelNum);
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
 			DBConnection.close(session);
 		}
-		return null;
+		return map;
 	}
 
 	public Expense selectExp(String email) {

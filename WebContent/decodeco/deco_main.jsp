@@ -40,7 +40,12 @@
 	
 </style>
 <decorator:head />
-
+<script type="text/javascript" src="http://cdn.ckeditor.com/4.5.7/full/ckeditor.js">
+<%--
+	모든 게시판에 스마트 에디터를 쓰겠다 !
+	version => full / smart / ...
+--%>
+</script>
 <body>
 
 <!-- Sidebar/menu -->

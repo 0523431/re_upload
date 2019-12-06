@@ -213,17 +213,17 @@ public class AllAction {
 			}
 			
 			String email = (String)request.getSession().getAttribute("email");
-			int boardcnt = tdao.boardCount(email);
+			int travelcnt = tdao.boardCount(email);
 
 			List<Travel> list = tdao.list(pageNum, limit, email);
-			int maxpage = (int)((double)boardcnt/limit + 0.95);
+			int maxpage = (int)((double)travelcnt/limit + 0.95);
 			int startpage = ((int)(pageNum/10.0 + 0.9) -1) *10 +1;
 			int endpage = startpage +9;
 			if(endpage > maxpage) {
 				endpage = maxpage;
 			}
-			int boardnum = boardcnt - (pageNum -1) *limit;
-			request.setAttribute("boardcnt", boardcnt);
+			int boardnum = travelcnt - (pageNum -1) *limit;
+			request.setAttribute("travelcnt", travelcnt);
 			request.setAttribute("list", list);
 			request.setAttribute("maxpage", maxpage);
 			request.setAttribute("startpage", startpage);
@@ -322,8 +322,10 @@ public class AllAction {
 	public ActionForward subList(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		if(LogCheck(request, response) ==1) {
 			int travelNum = Integer.parseInt(request.getParameter("travelNum"));
-			String mode = request.getParameter("mode"); // url에서 직접 받음
-			if(mode == null || mode.equals("all")) mode = "all";
+			String type1 = request.getParameter("type1"); // url에서 직접 받음
+			if(type1 == null || type1.equals("all")) {
+				type1 = "all";
+			}
 			
 			Travel info = tdao.selectOne(travelNum); // num에 해당하는 게시물 조회
 			request.setAttribute("info", info); //  이걸로 여행기간을 불러올 수 있음
@@ -332,14 +334,13 @@ public class AllAction {
 			String email = request.getParameter("email");
 			
 			// 속성값으로 내용을 보냄
-			request.setAttribute("info", info);
 			request.setAttribute("travelNum", info.getTravelNum());
 			
 			int expcnt = edao.excnt(email, travelNum);
 			request.setAttribute("expcnt", expcnt);
 			
 			// travelNum에 등록된 지출을 list로 불러옴
-			List<Expense> exlist = edao.exlist(travelNum, email, mode);
+			List<Expense> exlist = edao.exlist(travelNum, email, type1);
 			request.setAttribute("exlist", exlist);
 			System.out.println("exlist : " + exlist);
 			
@@ -505,13 +506,14 @@ public class AllAction {
 		}
 	}
 	
+	// subList에서 그래프
 	public ActionForward graph(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		if(LogCheck(request, response) ==1) {
 			String email = (String)request.getSession().getAttribute("email");
-			Expense exp = edao.selectExp(email);
-			int travelNum = exp.getTravelNum();
-			
-			List<Map<Integer,Integer>> list = edao.graph(email, travelNum);
+			int travelNum = Integer.parseInt(request.getParameter("travelNum"));
+			System.out.println("graph : " + email + travelNum);
+			List<Map<String, Integer>> list = edao.graph(email, travelNum);
+			System.out.println("graph list : " + list);
 			request.setAttribute("list", list);
 			return new ActionForward();
 		} else {
@@ -599,33 +601,81 @@ public class AllAction {
 	}
 	
 	public ActionForward bookmarkform(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		if(LogCheck(request, response) ==1) {
-			
-			String email = request.getParameter("email");
-			int expenseNum = Integer.parseInt(request.getParameter("expenseNum"));
-			System.out.println("book확인 : "+ email + expenseNum);
-			
-			BookmarkDao bdao = new BookmarkDao();
-			Bookmark book = bdao.insert(email, expenseNum);
-			
-			return new ActionForward(false, "../board/otherList.pro");
-		} else {
-			request.setAttribute("msg", "로그인이 필요합니다");
-			request.setAttribute("url", "../member/loginForm.pro");
-			return new ActionForward(false, "../alert.jsp");
+		String email = request.getParameter("email");
+		int expenseNum = Integer.parseInt(request.getParameter("expenseNum"));
+		System.out.println("book확인 : "+ email + expenseNum);
+		
+		BookmarkDao bdao = new BookmarkDao();
+		boolean book = bdao.insert(email, expenseNum);
+		
+		String msg1 = "";
+		if(book == true) {
+			msg1 = "따로따로에 추가되었습니다";
 		}
+		else {
+			msg1 = "이미추가된 게시물입니다";
+		}
+		
+		request.setAttribute("msg1", msg1);
+		System.out.println("book 값 : "+book);
+		return new ActionForward(false, "../board/bookmsg.pro"); // ajax으로 전달하는 파일
 	}
 
 	public ActionForward bookmark(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		if(LogCheck(request, response) ==1) {
 			String email = (String)request.getSession().getAttribute("email");
 			BookmarkDao bdao = new BookmarkDao();
-
-			List<Expense> list = bdao.select(email);
-			System.out.println("list 값 : "+list.toString());
-			request.setAttribute("list", list);
-			return new ActionForward();
 			
+			// 페이지 넘기기
+			int limit =10;
+			int pageNum =1;
+			
+			try {
+				pageNum = Integer.parseInt(request.getParameter("pageNum"));
+			} catch(NumberFormatException e) {
+				//e.printStackTrace();
+			}
+			int bookcnt = bdao.bookcnt(email);
+			
+			List<Expense> list = bdao.select(email, limit, pageNum);
+			request.setAttribute("list", list);
+			
+			int maxpage = (int)((double)bookcnt/limit + 0.95);
+			int startpage = ((int)(pageNum/10.0 + 0.9) -1) *10 +1;
+			int endpage = startpage +9;
+			if(endpage > maxpage) {
+				endpage = maxpage;
+			}
+			int boardnum = bookcnt - (pageNum -1) *limit;
+			request.setAttribute("travelcnt", bookcnt);
+			request.setAttribute("maxpage", maxpage);
+			request.setAttribute("startpage", startpage);
+			request.setAttribute("endpage", endpage);
+			request.setAttribute("boardnum", boardnum);
+			request.setAttribute("pageNum", pageNum);
+			return new ActionForward();			
+		} else {
+			request.setAttribute("msg", "로그인이 필요합니다");
+			request.setAttribute("url", "../member/loginForm.pro");
+			return new ActionForward(false, "../alert.jsp");
+		}
+	}
+	
+	public ActionForward imgupload(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if(LogCheck(request, response) ==1) {
+			String path = request.getServletContext().getRealPath("/") + "board/imgfile/";
+			File f = new File(path);
+			if(!f.exists()) {
+				f.mkdirs();
+			}
+			
+			MultipartRequest multi = new MultipartRequest(request, path, 10*1024*1024, "euc-kr");
+			String fileName = multi.getFilesystemName("upload");
+			
+			// "CKEditorFuncNum" : 이미 정해진거야, ck editor에게 파일이름을 전달해줘
+			request.setAttribute("fileName", fileName);
+			request.setAttribute("CKEditorFuncNum", request.getParameter("CKEditorFuncNum"));
+			return new ActionForward(false, "ckeditor.jsp");
 		} else {
 			request.setAttribute("msg", "로그인이 필요합니다");
 			request.setAttribute("url", "../member/loginForm.pro");

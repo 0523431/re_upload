@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -25,7 +26,7 @@ public interface ExpenseMapper {
 				" where 1=1 ",
 					" <if test='travelNum !=null'>and travelNum =#{travelNum} </if>",
 					" <if test='email !=null'>and email =#{email} </if>",
-				 	" <if test='mode !=null'> and type1 = #{mode} </if>",
+				 	" <if test='type1 !=null'> and type1 = #{type1} </if>",
 					" order by seldate desc, selhour desc, selminute desc ",
 		 	 "</script>"})
 	List<Expense> exlist(Map<String, Object> map);
@@ -40,7 +41,7 @@ public interface ExpenseMapper {
 				" select * from expense e join member m join travel t"
 				+ " on e.email = m.email AND e.travelNum  = t.travelNum ",
 	 			  " <if test='column !=null'> where ${column} like '%${find}%' </if>", 
-				  " order by expenseNum desc ",
+				  " order by expenseNum desc limit #{start}, #{limit} ",
 			"</script>"})
 	List<Expense> otherlist(Map<String, Object> map);
 	
@@ -58,14 +59,6 @@ public interface ExpenseMapper {
 			  	" <if test='email !=null'> and email =#{email} </if>",
 			"</script>"})
 	int excnt(Map<String, Object> map);
-	
-	// 그래프 : 맵객체를 리스트형태로 전달
-	@Select(" select type2, count(*) as cnt from expense "
-			  + " where travelNum =#{travelNum}"
-			  + " and email =#{email}"
-			  + " group by type2 "
-	  		  + " order by cnt desc ")
-	List<Map<Integer, Integer>> graph(Map<String, Object> map);
 	
 	@Select("select * from expense where email = #{email}")
 	Expense selectExp(Map<String, Object> map);
@@ -85,4 +78,23 @@ public interface ExpenseMapper {
 				" <if test='column !=null'> where ${column} like '%${find}%' </if>",
 			 "</script>"})
 	int expcnt(Map<String, Object> map);
+
+	//case 조건 컬럼 when 조건 값 then 출력값
+	//when 조건 값 then 출력값
+	//when 조건 값 then 출력값
+	//else 출력값 end
+	@Select(" select case type2 when 1 then '쇼핑' when 2 then '식비' else '기타' end type2, count(*) as cnt from expense "
+			  + " where travelNum =#{travelNum}"
+			  + " and email =#{email}"
+			  + " group by type2 "
+	  		  + " order by cnt desc ")
+	List<Map<String, Integer>> graph(@Param("email")String email, @Param("travelNum")int travelNum);
+	
+	// 그래프 : 맵객체를 리스트형태로 전달
+	@Select(" select type2, count(*) as cnt from expense "
+			  + " where travelNum =#{travelNum}"
+			  + " and email =#{email}"
+			  + " group by type2 "
+	  		  + " order by cnt desc ")
+	List<Map<Integer, Integer>> graph_test(Map<String, Object> map);
 }

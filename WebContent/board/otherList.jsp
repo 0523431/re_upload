@@ -21,13 +21,15 @@ td {
 <script>
 	// 검색 후, 그 결과를 페이지에 유지시켜주는 메서드함수
 	function listdo(page) { // listdo 메서드에 page값을 넣고
-		document.sf.pageNum.value = page; // pageNum의 value값을 바꿔주는 거야
-		document.sf.submit(); // form을 submit해주는 거야
+		document.search.pageNum.value = page; // pageNum의 value값을 바꿔주는 거야
+		document.search.submit(); // form을 submit해주는 거야
 	}
+	
 	function open_book(num) {
 		$.ajax("${path}/ajax/bookmarkform.pro?email=${sessionScope.email}&expenseNum="+num, {
-			success : function(data) {
-				alert("따로따로에 추가되었습니다");
+			success : function(msg1) {
+				alert(msg1);
+				// 유지보수 완료 (bookmsg.jsp에서 msg1 전달받음)
 			},
 			error : function(e) {
 				alert("서버오류 :" + e.status);
@@ -35,17 +37,6 @@ td {
 		})
 	}
 	
-	$("#bookmark").click(function() {
-		$.ajax("${path}/ajax/bookmark.pro?email=${sessionScope.email}", {
-			success : function(data) {
-				alert("따로따로에 추가되었습니다");
-			},
-			error : function(e) {
-				alert("서버오류 :" + e.status);
-			}
-		})
-	})
-
 	function open_comment() {
 		var op = "width=400, height=150, munubar=no, top=200, left=500";
 		open("bookmarkForm.pro?email=${sessionScope.email}", "window`s name",
@@ -54,10 +45,9 @@ td {
 </script>
 </head>
 <body>
-
-	<input type="hidden" name="pageNum" value="1">
 	<!-- 검색 -->
 	<form action="otherList.pro" method="post" name="search">
+	<input type="hidden" name="pageNum" value="1">
 		<table>
 			<tr>
 				<td style="border-width: 0px; border-radius: 10px 10px;"><select
@@ -68,12 +58,13 @@ td {
 						<option value="peocnt">동행인원</option>
 				</select> <script type="text/javascript">
 					document.search.column.value = "${param.column}";
-				</script> <input type="text" name="find" value="${param.find}"
+				</script> <input type="search" name="find" value="${param.find}"
 					style="width: 50%"> <input type="submit" value="검색">
 				</td>
 			</tr>
 		</table>
 	</form>
+	
 	<!-- 리스트 -->
 	<co:forEach var="list" items="${list}">
 		<table>
@@ -99,25 +90,28 @@ td {
 	<%-- 페이지 넘버 --%>
 	<table>
 		<tr>
-			<td colspan="5"><co:if test="${pageNum <=1}">
-			[이전]
-		</co:if> <co:if test="${pageNum >1}">
-					<%-- <a href="list.do?pageNum=${pageNum -1}">[이전]</a> --%>
-					<a href="javascript:listdo(${pageNum -1})">[이전]</a>
-				</co:if> <co:forEach var="a" begin="${startpage}" end="${endpage}">
-					<co:if test="${a ==pageNum}">
-				[${a}]
+		<td colspan="5">
+			<co:if test="${pageNum <=1}">
+				[이전]
 			</co:if>
-					<co:if test="${a !=pageNum}">
-						<%-- <a href="list.do?pageNum=${a}">[${a}]</a> --%>
-						<a href="javascript:listdo(${a})">[${a}]</a>
-					</co:if>
-				</co:forEach> <co:if test="${pageNum >= maxpage}">
-			[다음]
-		</co:if> <co:if test="${pageNum < maxpage}">
-					<%-- <a href="list.do?pageNum=${pageNum +1}">[다음]</a> --%>
-					<a href="javascript:listdo(${pageNum +1})">[다음]</a>
-				</co:if></td>
+			<co:if test="${pageNum >1}">
+				<a href="javascript:listdo(${pageNum -1})">[이전]</a>
+			</co:if>
+			<co:forEach var="a" begin="${startpage}" end="${endpage}">
+				<co:if test="${a ==pageNum}">
+				[${a}]
+				</co:if>
+				<co:if test="${a !=pageNum}">
+					<a href="javascript:listdo(${a})">[${a}]</a>
+				</co:if>
+			</co:forEach>
+			<co:if test="${pageNum >= maxpage}">
+				[다음]
+			</co:if>
+			<co:if test="${pageNum < maxpage}">
+				<a href="javascript:listdo(${pageNum +1})">[다음]</a>
+			</co:if>
+		</td>
 		</tr>
 	</table>
 </body>

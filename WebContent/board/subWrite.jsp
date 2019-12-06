@@ -120,7 +120,7 @@
 		<td class="tit">&nbsp;&nbsp;날짜&nbsp;&nbsp;</td>
 		<td class="sub">
 			<select name="seldate" id="seldate" onchange="selectdate(this)">
-				<c:forEach var="date" begin="${fn:substring(info.start,3,5)}" end="${fn:substring(info.end,3,5)}" >
+				<c:forEach var="date" begin="${fn:substring(info.start,8,10)}" end="${fn:substring(info.end,8,10)}" >
  					<option value="${date}" id="seldate">&nbsp;&nbsp;&nbsp;&nbsp;${date}&nbsp;&nbsp;&nbsp;&nbsp;</option>
 				</c:forEach>
 			</select>
@@ -151,7 +151,19 @@
 		</td>
 	</tr>
 	<tr><td colspan="3" class="sub">
-			<textarea rows="8" name="content" autocomplete="off"></textarea>
+			<textarea rows="8" name="content" id="content1" autocomplete="off"></textarea>
+			<script>
+				<%-- 이 기능을 쓰면 내용에 이미지를 올릴 수 있음
+					  이미지 업로드용 url : filebrowserImageUploadUrl => 업로드 탭이 만들어짐
+					  
+					 imgupload.do : 업로드를 위한 url을 지정해줌
+					 
+					 -------------------------------------
+					 업로드 탭에서 이미지 선택하고 업로드 버튼을 누르면 CKEDITOR가 imgupload.do를 실행시킴
+					 그러면 method.properties에서 imgupload 메서드로 연결 시키고
+				--%>
+				CKEDITOR.replace("content1", {filebrowserImageUploadUrl : "imgupload.pro"});
+			</script>
 		</td>
 	</tr>
 	<!-- <tr><td colspan="3" class="sub">
