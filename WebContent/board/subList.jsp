@@ -54,6 +54,16 @@ td {
 }
 </style>
 <script>
+var randomColorFactor = function() {
+	return Math.round(Math.random() *255);
+};
+var randomColor = function(opacity) {
+	return "rgba("+randomColorFactor() + ","
+		+ randomColorFactor() + ","
+		+ randomColorFactor() + ","
+		+ (opacity || '.3') +")";
+};
+
 $(document).ready(function() {
 	graphs();
 })
@@ -83,7 +93,8 @@ function barGraphprint(data) {
 	$.each(rows, function(index, item) {
 		type2s[index] = item.type2; // type2s
 		datas[index] = item.cnt; // 글의 개수 저장
-		colors[index] = ["red", "yellow", "orange", "green", "blue", "navy", "purple"];
+		colors[index] = randomColor();
+			//["red", "yellow", "orange", "green", "blue", "navy", "purple"];
 	})
 	
 	var chartData = {
@@ -163,7 +174,7 @@ function barGraphprint(data) {
 	</tr>
 </table>
 
-<div class="test">
+<div class="test" style="width: 75%;">
 	<canvas id="canvas">
 	</canvas>
 </div>
