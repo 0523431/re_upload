@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+
+<decorators defaultdir="/decodeco">
+	<decorator name="test" page="deco_main.jsp">
+		<pattern>/member/*</pattern>
+	</decorator>
+	
+ 	<decorator name="index" page="deco_index.jsp">
+		<pattern>/member/*</pattern>
+		<pattern>/board/*</pattern>
+	</decorator>
+	
+	<!-- 제외되는 페이지 설정 -->
+	<excludes>
+<!-- 		<pattern>/board/mainWrite*</pattern>
+		<pattern>/board/mainUpdate*</pattern> -->
+		<pattern>/member/log*</pattern>
+		<pattern>/member/join*</pattern>
+		<pattern>/member/profile*</pattern>
+		<pattern>/board/picture*</pattern>
+		<pattern>/member/pw*</pattern>
+		<pattern>/ajax/*</pattern>
+	</excludes>
+</decorators>
